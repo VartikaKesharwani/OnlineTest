@@ -1,8 +1,11 @@
+package bean;
 
 
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Set;
+
+import servicelayer.TestInterface;
 
 public class TestDao implements TestInterface {
 

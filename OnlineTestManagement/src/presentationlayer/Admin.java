@@ -1,3 +1,6 @@
+package presentationlayer;
+
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,6 +11,9 @@ import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
+import bean.Question;
+import bean.Test;
 
 public class Admin {
 	static BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
@@ -35,7 +41,7 @@ public class Admin {
 				System.out.println("Enter Question options");
 				for(i=0;i<4;i++)
 				{
-					//System.out.print(i+1);
+					
 					sample.getQuestionOptions()[i]=br.readLine();
 				}
 				System.out.println("Enter Correct answer");
@@ -61,8 +67,6 @@ public class Admin {
 	LocalTime testDuration;
 	//Set<Question> testQuestion=new HashSet<Question>();
 	BigDecimal testTotalMarks=new BigDecimal(0);
-	//BigDecimal testMarksScored;
-	//Question currentQuestion;
 	LocalDateTime startTime,endTime;
 	Admin admin=new Admin();
 	try {
@@ -106,6 +110,7 @@ public Set<Test> deleteTest(BigInteger testId)
 		if(test.getTestId()==testId)
 		{
 			testCollection.remove(test);
+			System.out.println("Deleted");
 			break;
 		}
 	}

@@ -1,13 +1,21 @@
+package presentationlayer;
 
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import bean.Question;
+import bean.Test;
+import bean.User;
+import bean.UserDao;
+import servicelayer.ValueNullException;
 
 public class Menu {
 
@@ -15,52 +23,46 @@ public class Menu {
 	public static void main(String[] args) {
 		int choice;
 		User admin = new User();
-		admin.setUserId((long)111);
+		admin.setUserId((long)26);
 		admin.setAdmin(true);
 		admin.setUserName("Vartika");
-		admin.setUserPassword("Vartika26@");
+		admin.setUserPassword("Vartika526@");
 		UserDao.addUser(admin);
 		Menu menu = new Menu();
 		
 		try {
 			while(true) {
-				System.out.println("1.Login\t2.Signup");
-				System.out.println("Enter Your Choice");
+				System.out.println("Enter the Choice for Online Test Management");
+				System.out.println("1.Login");
+				System.out.println("2.SignUp");
 			choice = Integer.parseInt(br.readLine());
 			switch(choice)
 			{
 			case 1 : menu.login();
 				break;
 			case 2 : if(menu.signUp()) {
-						System.out.println("Do you want to login now?");
+						System.out.println("\t\tDo you want to login now?");
 						if(br.readLine().equalsIgnoreCase("yes"))
 						menu.login();
 					}
 					 break;
-			default : System.out.println("try Again.Please Enter Valid Choice.");
+			default : System.out.println("\t\t Sorry. Wrong Choice");
 			}
-			System.out.println("Do you want to continue....");
+			System.out.println("\t\t Do you want to continue....");
 			if(br.readLine().equalsIgnoreCase("yes"))
 				continue;
 			else
 				break;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}catch(NumberFormatException e1)
 		{
-			System.out.println("Please only enter in digits");
+			System.out.println("\t\t please try only for digits");
 		}
 	}
-
 	private boolean signUp() {
 		User user = new User();
-		/*userPassword should have at least one upper case character,
-			 *  one lower case character, one numeric character 
-			 * and one special character and the length of password should 
-			 * be minimum 8 characters.
-			 */
 		Set<User> users = UserDao.getUsers();
 		Iterator<User> usit = users.iterator();
 		
@@ -74,7 +76,7 @@ public class Menu {
 		try {
 			String Id = br.readLine();
 			if(Id.isEmpty()) {
-				throw new NullException("You haven't entered anything in id");
+				throw new ValueNullException("This field must be filled");
 			}
 			userId = Long.parseLong(Id);
 			while(usit.hasNext())
@@ -82,7 +84,7 @@ public class Menu {
 				User nextUser = usit.next();
 				if(nextUser.getUserId()==userId)
 				{
-					System.out.println("This User Id already taken. Try something else");
+					System.out.println("ID already exists!!!!");
 					System.exit(0);
 				}
 			}
@@ -90,10 +92,10 @@ public class Menu {
 			Matcher m = charCapital.matcher(userName = br.readLine());
 			if(m.find()!=true)
 			{
-				System.out.println("You have not enterd first char as capital.Try Again");
+				System.out.println("You have not enterd first char as capital.SORRY");
 				System.exit(0);
 			}
-			System.out.println("Enter Your Password.It must contain atleast 1 Uppercase char, 1 Lowercase,1 digit and a special character");
+			System.out.println("Enter Your Password.(contains uppercase,lowercase,digits and special symbol)");
 			Matcher pm  = pwd.matcher(userPassword = br.readLine());
 			if(pm.find()!=true)
 			{
@@ -110,7 +112,7 @@ public class Menu {
 				System.out.println("Successfully Signed Up. You Can now Log In");
 				flag = true;
 			}
-		}catch(NullException n)
+		}catch(ValueNullException n)
 		{
 			n.printStackTrace();
 			System.out.println("Please Enter something in Id");
@@ -125,17 +127,15 @@ public class Menu {
 		}
 		return flag;
 	}
-
 	private void login() {
 		boolean userExists = false;
 		UserDao us = new UserDao();
-		System.out.println("Enter User Id");
+		System.out.print("\t\tUser Id : ");
 		try {
 			Long id = Long.parseLong(br.readLine());
-			System.out.println("Enter Your Password");
+			System.out.print("\t\tEnter Your Password : ");
 			String pwd = br.readLine();
 			Set<User> users = UserDao.getUsers();
-			System.out.println(users);
 			Iterator<User> it = users.iterator();
 			while(it.hasNext())
 			{
@@ -145,7 +145,7 @@ public class Menu {
 					userExists = true;
 					if(nextUser.getUserPassword().equals(pwd))
 					{
-						System.out.print("Welcome "+nextUser.getUserName()+" ");
+						System.out.print("\t\tWelcome "+nextUser.getUserName().toUpperCase()+" ");
 						if(nextUser.isAdmin())
 						{
 							BigInteger testId=null;
@@ -153,10 +153,15 @@ public class Menu {
 							boolean adminFlag = true;
 							System.out.println("You are an admin");
 							while(adminFlag) {
-							System.out.println("1.Add Test               2.Update an existing test  3.Delete an existing test");
-							System.out.println("4.Assign test to a user  5.Add questions to a test  6.Update a question of a test");
-							System.out.println("7.Delete a question from a test");
+							System.out.println("1. Add a Test");
+							System.out.println("2. Update Test");
+							System.out.println("3. Delete Test");
+							System.out.println("4. Assign Test to user");
+							System.out.println("5. Add Questions to a test");
+							System.out.println("6. Update a question of a Test");
+							System.out.println("7.Delete a Question from a Test");
 							int choice = Integer.parseInt(br.readLine());
+			
 							switch(choice)
 							{
 							case 1 : us.addTest(new Test());
@@ -169,7 +174,7 @@ public class Menu {
 							 		 testId = new BigInteger(br.readLine());
 							 		 us.deleteTest(testId);
 							 		 break;
-							case 4 : System.out.println("Enter userId of the user to whome you want to assign the test");
+							case 4 : System.out.println("Enter userId of the user to whom you want to assign the test");
 									 Long userId = Long.parseLong(br.readLine());
 									 System.out.println("Enter the test id of the test you want to assign");
 									 BigInteger testId2 = new BigInteger(br.readLine());
@@ -185,14 +190,18 @@ public class Menu {
 							case 6 : System.out.println("Enter the test id of the test you want to update question in");
 					         		 testId = new BigInteger(br.readLine());
 					         		 System.out.println("Enter question Id of the question you want to update");
+					         		 System.out.println("Now Enter new Question Details");
+					         		 question = us.addQuestions(testId, new Question());
+					         		 us.updateQuestions(testId, question);
 					         		 break;
 							case 7 : System.out.println("");
 							         us.deleteQuestions(testId, question);
+							         break;
 							default :
-									  System.out.println("Wrong Choice.Try Again");
+									  System.out.println(" Sorry Wrong Choice. Please Try Again");
 							
 							}
-							System.out.println("Do you want to do something else?");
+							System.out.println("Do you want to do something else? Say no to log out.");
 							if((br.readLine()).equalsIgnoreCase("yes"))
 								continue;
 							else
@@ -201,10 +210,20 @@ public class Menu {
 						}
 						else
 						{
-							System.out.println("\nDo you want to see your result? say yes or no");
+							Menu menu = new Menu();
+							System.out.println("Do you want to take your assigned test?");
+							try {
+							if(br.readLine().equalsIgnoreCase("yes"))
+							menu.takeTest(id);
+							System.out.println("\nSee your result!!! Say yes or no");
 							if((br.readLine()).equalsIgnoreCase("yes"))
 							{
-								System.out.println("You have scored "+nextUser.getUserTest().getTestMarksScored());
+								UserDao dao = new UserDao();
+								System.out.println("You have scored "+dao.getResult(nextUser.getUserTest()));
+							}
+							}catch(NullPointerException np)
+							{
+								System.out.println("No test is assigned.");
 							}
 							
 						}
@@ -212,18 +231,55 @@ public class Menu {
 					}
 					else
 						System.out.println("Please Enter Correct Password;");
-				}
-			//	break;
+				}	
 			}
 			if(userExists == false)
 				System.out.println("This user does not exist");
 			
 		} catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	 void takeTest(Long id) {
+				Set<User> users = UserDao.getUsers();
+				Iterator<User> usit = users.iterator();
+				try {
+				while(usit.hasNext())
+				{
+					User nextUser = usit.next();
+					if(nextUser.getUserId() == id)
+					{
+						Test userTest = nextUser.getUserTest();
+						Set<Question> testQuestions = userTest.getTestQuestions();
+						Iterator<Question> tqit = testQuestions.iterator();
+						
+						
+							while(tqit.hasNext())
+						{
+							Question nextQuestion = tqit.next();
+							System.out.println("Q "+nextQuestion.getQuestionId()+"."+nextQuestion.getQuestionTitle());
+							for(int i=0;i<4;i++)
+							{
+								System.out.println((i+1)+"."+nextQuestion.getQuestionOptions()[i]);
+							}
+							System.out.println("Enter Your Answer 1-4");
+							
+								int ans = Integer.parseInt(br.readLine());
+								nextQuestion.setChosenAnswer(ans);
+								if(nextQuestion.getChosenAnswer()==nextQuestion.getQuestionAnswer())
+								{
+									nextQuestion.setMarksScored(nextQuestion.getQuestionMarks());
+								}
+								else
+									nextQuestion.setMarksScored(new BigDecimal(0));
+							} 
+						}
+					}
+				}catch (NumberFormatException | IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 	}
 }

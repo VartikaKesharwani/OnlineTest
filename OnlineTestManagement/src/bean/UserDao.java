@@ -1,3 +1,4 @@
+package bean;
 
 
 import java.io.BufferedReader;
@@ -5,11 +6,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
+import servicelayer.UserInterface;
+import servicelayer.ValueNullException;
 
 public class UserDao implements UserInterface {
 	static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -43,16 +48,18 @@ public class UserDao implements UserInterface {
 			System.out.println("Enter Test ID");
 			testId=new BigInteger(br.readLine());
 			if(testId.toString().isEmpty())
-				throw new NullException("Test Id you Entered doesn't contain even a single character");
+				throw new ValueNullException("Test Id you Entered doesn't contain any character");
 			System.out.println("Enter Test Title");
 			testTitle= br.readLine();
 			System.out.println("Enter Maximum Test Marks");
 			testTotalMarks = new BigDecimal(br.readLine());
-			System.out.println("Enter Test Duration");
-			testDuration=LocalTime.parse(br.readLine());
-			System.out.println("Enter Start Time");
-			startTime=LocalDateTime.parse(br.readLine());
-			endTime=startTime.plusHours(testDuration.getHour());
+			System.out.println("Enter Test Duration in hours-minutes");
+			String[] duration = br.readLine().split("-");
+			testDuration=LocalTime.of(Integer.parseInt(duration[0]),Integer.parseInt(duration[1]));
+			System.out.println("Enter Start Time as Hour:Minute");
+			String[] sTime = br.readLine().split(":");
+			startTime=LocalDateTime.of(LocalDate.now(), LocalTime.of(Integer.parseInt(sTime[0]), Integer.parseInt(sTime[1])));
+			endTime=startTime.plusHours(testDuration.getHour()).plusMinutes(testDuration.getMinute());
 			test.setTestId(testId);
 			test.setTestTitle(testTitle);
 			test.setTestDuration(testDuration);
@@ -60,6 +67,7 @@ public class UserDao implements UserInterface {
 			test.setEndTime(endTime);
 			test.setTestTotalMarks(testTotalMarks);
 			test.setTestMarksScored(testMarksScored);
+			tests.add(test);
 			while(flag==true)
 			{
 				Question question = new Question();
@@ -78,7 +86,7 @@ public class UserDao implements UserInterface {
 
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (NullException e) {
+		} catch (ValueNullException e) {
 			// TODO Auto-generated catch block
 			System.out.println("Enter a test id that is not null");
 		}
@@ -88,10 +96,11 @@ public class UserDao implements UserInterface {
 	{
 		System.out.println("Enter questionId");
 		try {
+			//System.out.println(tests);
 			Iterator<Test>it = tests.iterator();
 			while(it.hasNext()) {
 				Test t = it.next();
-				if(t.getTestId()==testId) {
+				if(t.getTestId().equals(testId)) {
 			BigInteger questionId = new BigInteger(br.readLine());
 			System.out.println("Enter question title");
 			String questionTitle = br.readLine();
@@ -152,7 +161,7 @@ public class UserDao implements UserInterface {
 		while(itt.hasNext())
 		{
 			Test t = itt.next();
-			if(t.getTestId()==TestId)
+			if(t.getTestId().equals(TestId))
 			{
 				testFlag = true;
 				while(itu.hasNext()) {
@@ -164,9 +173,10 @@ public class UserDao implements UserInterface {
 						break;
 					}
 				}
-				break;
+				
 			}
 		}
+		System.out.println(testFlag+"   "+userFlag);
 		if(testFlag==true && userFlag==true)
 			flag = true;
 		return flag;
@@ -178,9 +188,10 @@ public class UserDao implements UserInterface {
 		while(testIterator.hasNext())
 		{
 			 test=testIterator.next();
-			if(test.getTestId()==testId)
+			if(test.getTestId().equals(testId))
 			{
 				tests.remove(test);
+				System.out.println("Deleted");
 				break;
 			}
 		}
@@ -193,13 +204,13 @@ public class UserDao implements UserInterface {
 			while(it.hasNext())
 			{
 				Test t = it.next();
-				if(t.getTestId()==testId) 
+				if(t.getTestId().equals(testId)) 
 				{
 					Iterator<Question> itq = t.getTestQuestions().iterator();
 					while(itq.hasNext())
 					{
 						Question q = itq.next();
-						if(q.getQuestionId()==question.getQuestionId())
+						if(q.getQuestionId().equals(question.getQuestionId()))
 						{
 							System.out.println("Enter new Question title");
 							String title = br.readLine();
@@ -220,7 +231,7 @@ public class UserDao implements UserInterface {
 							break;
 						}
 					}
-					break;
+					
 				}
 			}
 		}catch(IOException e)
@@ -233,15 +244,23 @@ public class UserDao implements UserInterface {
 	{
 		//UserDao us = new UserDao();
 		Iterator<Test> tit = tests.iterator();
+		Test t=null;
 		while(tit.hasNext())
 		{
-			Test t = tit.next();
+			t = tit.next();
 			if(t.getTestId().equals(testId))
 			{
-				
+				t.setTestId(test.getTestId());
+				t.setTestTitle(test.getTestTitle());
+				t.setTestTotalMarks(test.getTestMarksScored());
+				t.setCurrentQuestion(t.getCurrentQuestion());
+				t.setTestDuration(test.getTestDuration());
+				t.setTestQuestions(test.getTestQuestions());
+				t.setStartTime(test.getStartTime());
+				t.setEndTime(test.getEndTime());
 			}
 		}
-		return test;
+		return t;
 	}
 	public BigDecimal getResult(Test test)
 	{

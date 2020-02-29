@@ -1,5 +1,4 @@
-
-
+package bean;
 
 public class User {
 	private Long UserId;

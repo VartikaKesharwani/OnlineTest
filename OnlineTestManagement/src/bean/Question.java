@@ -1,3 +1,4 @@
+package bean;
 
 
 import java.math.BigDecimal;
